@@ -1,0 +1,10 @@
+# Service ID
+get_data:
+  name: Get Exchange Rate Data from European Central Bank
+  description: Retrieves currnecy exchange rate data from European Central Bank (ECB) API for specified currencies.
+  fields:
+    currencies:
+      name: Price Areas
+      description: List of currencies to get exchange rates for.
+      required: true
+      example: "['SEK', 'NOK']"
