@@ -1,5 +1,5 @@
 # Currency Exchange Rate integration for Home Assistant
-This custom component retrieves currency exchange rates from the European Central Bank (ECB) and makes them available as a sensor in Home Assistant. ECB provides daily reference exchange rates via an free API. The rates gets updated around 16.00 CET every working day ([more info here](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html)).
+This custom component retrieves currency exchange rates from the [European Central Bank (ECB)](https://www.ecb.europa.eu/) and makes them available as a sensor in Home Assistant. ECB provides daily reference exchange rates via an free API. The rates gets updated around 16.00 CET every working day (more info [here](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html)).
 
 ## Features
 The integration gives the latest currency exchange rate between the specified currencies and the Euro (EUR). The exchange rate will be updated at midnight every day and the latest available exchange rate will be used.
