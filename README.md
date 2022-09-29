@@ -19,7 +19,7 @@ ecb_exr:
       - NOK
 ```
 
-Add the following to your `configuration.yaml` under `sensor:`. This will create on sensor for each currency specified above.
+Add the following to your `configuration.yaml` under `sensor:`. This will create one sensor for each currency specified above.
 ```yaml
 sensor:
  - platform: ecb_exr
