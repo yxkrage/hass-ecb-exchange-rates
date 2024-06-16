@@ -1,9 +1,11 @@
-import requests
-import xml.etree.ElementTree as et
 from datetime import date
+import xml.etree.ElementTree as et
 
+import aiohttp
+import httpx
 
-REQUEST_URL = "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/"
+# REQUEST_URL = "https://sdw-wsrest.ecb.europa.eu/service/data/EXR/"
+REQUEST_URL = "https://data-api.ecb.europa.eu/service/data/EXR/"
 EXR_TYPE = "SP00"
 EXR_SUFFIX = "A"
 PARM_NAME_PERIOD_START = "startPeriod"
@@ -52,6 +54,10 @@ class EcbParseTagNotFoundException(EcbParseException):
     def __init__(self, tag_name: str):
         super().__init__(f"Unable to find tag '{tag_name}'")
 
+class HttpResponse:
+    def __init__(self, status_code, text):
+        self.status_code = status_code
+        self.text = text
 
 def build_query_str(currency: str,
                     currency_denom: str,
@@ -68,12 +74,30 @@ def build_query_str(currency: str,
            f"{PARM_NAME_PERIOD_START}={date_from:%Y-%m-%d}&{PARM_NAME_PERIOD_END}={date_to:%Y-%m-%d}"
 
 
-def call_api(query_str: str) -> requests:
-    resp = requests.request("GET", f"{REQUEST_URL}{query_str}")
-    return resp
+def call_api(query_str: str) -> HttpResponse:
+    with httpx.Client() as client:
+        resp = client.get(f"{REQUEST_URL}{query_str}")
+    ret = HttpResponse(resp.status_code, resp.text)
+    return ret
 
+# async def async_call_api(query_str: str) -> httpx.Response:
+#     timeout = httpx.Timeout(10.0, connect=30.0)  # Set timeouts for safety
+#     query_str = f"{REQUEST_URL}{query_str}"
+#     async with httpx.AsyncClient(timeout=timeout) as client:
+#         resp = await client.get(query_str)
+#     return resp
+async def async_call_api(query_str: str) -> HttpResponse:
+    timeout = aiohttp.ClientTimeout(total=30)  # Set timeouts for safety
+    query_str = f"{REQUEST_URL}{query_str}"
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(query_str) as resp:
+            data = await resp.text()
+            code = resp.status
+    ret = HttpResponse(code, data)
+    return ret
 
-def parse_response(response: requests.Response):
+# def parse_response(response: httpx.Response):
+def parse_response(response: HttpResponse):
 
     def find(element: et, tag: str) -> et:
         el = element.find(tag, NS)
@@ -141,4 +165,19 @@ def get_exchange_rate(currency: str,
 
     qs = build_query_str(currency, currency_denom, freq, date_from, date_to)
     resp = call_api(qs)
+    return parse_response(resp)
+
+
+async def async_get_exchange_rate(currency: str,
+                            currency_denom: str,
+                            freq: str,
+                            date_from: date = None,
+                            date_to: date = None):
+    if date_from is None:
+        date_from = date.today()
+    if date_to is None:
+        date_to = date_from
+
+    qs = build_query_str(currency, currency_denom, freq, date_from, date_to)
+    resp = await async_call_api(qs)
     return parse_response(resp)
