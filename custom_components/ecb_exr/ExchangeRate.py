@@ -77,7 +77,7 @@ class ExchangeRate:
             _LOGGER.info(f"Exchange rate for {self.currency} successfully retrieved from API.")
 
         except EcbException as e:
-            self._hass.states.set(f"{DOMAIN}.{self.currency}", "error")
+            self._hass.states.async_set(f"{DOMAIN}.{self.currency}", "error")
             _LOGGER.error(e.message, e)
 
         # Fire Event to signal that data is updated
